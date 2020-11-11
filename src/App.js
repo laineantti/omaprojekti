@@ -1,106 +1,44 @@
-import React, { useEffect } from 'react';
-import { useState } from 'react'
-import LapsiLista from './LapsiLista'
-//import './App.css';
-// lukumäärä???
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import './App.css';
+import Esineet from './Esineet'
+//useReducer = REDUX
+//Context API
 
+//Axios, useEffect
+const App = () => {
 
-//let u = {0:"pekka",1:"leena"}
+  //    const [data,setData] = useState(["Dataa haetaan"])
 
-function App() {
-  //array destructuring 
-  //let lapset = [{lapsenNimi:"Lissa"},{lapsenNimi:"Kaapo"}] 
   const [data, setData] = useState([])
-  //const [sukunimi, setSukunimi]=useState("")???
+  const [kategoriaValittu, setKategoriaValittu] = useState(false)
+  const [kategoriaId, setKategoriaId] = useState(0)
 
-  const initialData = [
-    {
-      etunimi: "Pekka", sukunimi: "Jakamo", ikä: 29, jälkikasvu: [{ lapsenNimi: "Lissa", nimet: { ensimmäinen_nimi: "Lissa", toinen_nimi: "Riitta" } },
-      { lapsenNimi: "Kaapo" }]
-    },
-    { etunimi: "Jarmo", sukunimi: "Jakamo", ikä: 49 }]
-
-  const [selected, setSelected] = useState([])
-  // localSotragen data-avaimena on "data"
   useEffect(() => {
-
-    let jemma = window.localStorage;
-    let tempData = JSON.parse(jemma.getItem("data"))
-    if (tempData==null) {
-      jemma.setItem("data", JSON.stringify(initialData))
-      tempData = initialData
-    } else {
-    if (tempData.lenght==0) {
-      jemma.setItem("data", JSON.stringify(initialData))
-      tempData = initialData
-      
-    }}
-    /* if (tempData.length==0 || tempData==null) {
-      jemma.setItem("data", JSON.stringify(initialData))
-      tempData = initialData
-    } */
-    setData(tempData);
-
-  },
-    [])
-  useEffect(() => {
-
-    window.localStorage.setItem("data", JSON.stringify(data))
-
-  },
-    [data])
-
-
-  const painikePainettu = () => {
-
-    let uusdata = JSON.parse(JSON.stringify(data));
-    //    let uusdata = [...data];
-
-    //   uusdata[0].jälkikasvu[0].lapsenNimi="Mikko"
-    // let uusdata = [...data];
-    let lopullinenData = data.concat(uusdata)
-    setData(lopullinenData)
-    //setRows([]);
-  }
-  const näytäJälkikasvu = (index) => {
-    if (data[index].jälkikasvu !== undefined) {
-      return data[index].jälkikasvu.map((alkio, lapsenIndex) =>
-        <div key={lapsenIndex}>
-          <input onChange={(e) => { lapsenNimiMuuttui(e, index, lapsenIndex) }} value={alkio.lapsenNimi}>
-          </input>
-        </div>)
+    async function haeDataa() {
+      let result = await axios('https://api.huuto.net/1.1/categories');
+      console.log(JSON.parse(result.request.response).categories);
+      setData(JSON.parse(result.request.response).categories);
 
     }
+
+    haeDataa();
+
+  }, [])
+
+  const kategoriaNappiPainettu = (id) => {
+
+    setKategoriaValittu(true);
+    setKategoriaId(id);
+    // console.log(id)
   }
-  const lapsenNimiMuuttui = (event, vanhemmanIndex, lapsenIndex) => {
-
-    let syväKopio = JSON.parse(JSON.stringify(data))
-    syväKopio[vanhemmanIndex].jälkikasvu[lapsenIndex].lapsenNimi = event.target.value;
-    setData(syväKopio)
-
-
-  }
-  const sukunimiMuuttui = (event, index) => {
-
-    let syväKopio = JSON.parse(JSON.stringify(data))
-    syväKopio[index].sukunimi = event.target.value;
-    setData(syväKopio)
-
-  }
-
 
   return (<div>
 
-    {data.map((item, index) => <div key={index}>
-      <input onChange={(event) => sukunimiMuuttui(event, index)} value={item.sukunimi}>
-      </input> {item.etunimi} {item.ikä}
-      {item.jälkikasvu? <LapsiLista lapsenNimiMuuttui={lapsenNimiMuuttui} parentIndex={index} lapsiLista={item.jälkikasvu}></LapsiLista>:""}
-      </div>)}
-
-    
-    <button onClick={painikePainettu}> Paina minua</button>
-  </div>
-  );
+    {data.map(alkio => <button onClick={() => kategoriaNappiPainettu(alkio.id)}>{alkio.title}</button>)
+    }
+    {kategoriaValittu && <Esineet id={kategoriaId} ></Esineet>}
+  </div>)
 }
 
-export default App;
+export default App
