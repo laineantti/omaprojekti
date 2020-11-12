@@ -1,4 +1,4 @@
-import * as React from 'react';
+/* import * as React from 'react';
 import { DataGrid } from '@material-ui/data-grid';
 
 const columns = [
@@ -43,3 +43,4 @@ export default function DataGridDemo() {
     </div>
   );
 }
+ */
