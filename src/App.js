@@ -1,9 +1,8 @@
 import React, { useEffect } from 'react';
 import { useState } from 'react'
 import LapsiLista from './LapsiLista'
-import {v4 as uuid} from "uuid";
+import uuid from 'react-uuid'
 import axios from 'axios';
-
 //import './App.css';
 // lukumäärä???
 
@@ -18,45 +17,78 @@ function App() {
 
   //const [sukunimi, setSukunimi]=useState("")???
 
-  /* const initialData = {
-    ihmiset: [
-      {
-        uid: uuid(), etunimi: "Pekka", sukunimi: "Jakamo", ikä: 29, jälkikasvu: [{ uid: uuid(), lapsenNimi: "Lissa", nimet: { ensimmäinen_nimi: "Lissa", toinen_nimi: "Riitta" } },
-        { lapsenNimi: "Kaapo" }]
-      },
-      { uid: uuid(), etunimi: "Jarmo", sukunimi: "Jakamo", ikä: 49 }
-    ]
-  } */
+  const initialData =
+
+  [
+    {
+    uid: uuid(), etunimi: "Pekka", sukunimi: "Jakamo", ikä: 29, jälkikasvu: [
+        { uid: uuid(), lapsenNimi: "Lissa", nimet: { ensimmäinen_nimi: "Lissa", toinen_nimi: "Riitta"
+          }
+        },
+        { lapsenNimi: "Kaapo"
+        }
+      ]
+    },
+    { uid: uuid(), etunimi: "Jarmo", sukunimi: "Jakamo", ikä: 49
+    }
+  ]
+
 
   const [selected, setSelected] = useState([])
 
   useEffect(() => {
-    async function haeDataa() {
-      let result = await axios('http://localhost:3001/ihmiset');
-      /* console.log(JSON.parse(result.request.response).categories); */
-      setData(result.data);
-      /* setData(tempData); */
-      setDataAlustettu(true)
 
+    const createData = async() => {
+      
+      try {
+
+        let result = await axios.post("http://localhost:3001/ihmiset", initialData)
+        setData(initialData)
+        setDataAlustettu(true)
+
+      } catch (exception) {
+        alert("Tietokannan alustaminen epäonnistui")
+      }
     }
 
-    /* 
-        let jemma = window.localStorage;
-        let tempData = JSON.parse(jemma.getItem("data"))
-        if (tempData == null) {
-          jemma.setItem("data", JSON.stringify(initialData))
-          tempData = initialData
-        } */
-
-    haeDataa();
+    const fetchData = async () => {
+      try {
+        let result = await axios.get("http://localhost:3001/ihmiset")
+        if (result.data.length > 0) {
+          setData(result.data);
+          setDataAlustettu(true)
+        } else {
+          throw ("Nyt pitää data kyllä alustaa!")
+        }
+      }
+      catch (exception) {
+        createData();
+        console.log(exception)
+      }
+    }
+    fetchData();
   }, [])
 
   useEffect(() => {
+    const updateData = async () => {
+      try {
+        let result = await axios.put("http://localhost:3001/ihmiset", data)
+      } catch (exception) {
+        console.log("Datab päivitys ei onnistunut")
+      }
+    }
+  
     if (dataAlustettu) {
-      window.localStorage.setItem("data", JSON.stringify(data))
+      updateData();
     }
   }, [data])
-
+   
+  //   if (dataAlustettu) {
+  //PUT
+  //     window.localStorage.setItem("data", JSON.stringify(data))
+  //   }
+  // }, [data])
+  //*/
 
   const painikePainettu = () => {
 
@@ -120,7 +152,6 @@ function App() {
     setData(syväKopio)
   }
 
-  // opettajan koodi commit
 
   return (<div>
 
