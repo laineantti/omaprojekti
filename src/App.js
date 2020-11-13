@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { useState } from 'react'
 import LapsiLista from './LapsiLista'
-import uuid from 'react-uuid'
+const { v4: uuid } = require('uuid');
 import axios from 'axios';
 //import './App.css';
 // lukumäärä???
@@ -9,11 +9,26 @@ import axios from 'axios';
 
 //let u = {0:"pekka",1:"leena"}
 
+// f(x)
+// reducer-funktio välitetään Lapselle
+// dispatch-funktio on ns. "x"
+function reducer(state, action) {
+  switch (action.type) {
+    case 'increment':
+      return {count: state.count + 1};
+    case 'decrement':
+      return {count: state.count - 1};
+    default:
+      throw new Error();
+  }
+}
+
 function App() {
   //array destructuring 
   //let lapset = [{lapsenNimi:"Lissa"},{lapsenNimi:"Kaapo"}] 
   const [data, setData] = useState([])
   const [dataAlustettu, setDataAlustettu] = useState(false)
+  const [state, dispatch] = useReducer(reducer, initialArg, init);
 
   //const [sukunimi, setSukunimi]=useState("")???
 
@@ -43,8 +58,11 @@ function App() {
       try {
 
         let result = await axios.post("http://localhost:3001/ihmiset", initialData)
-        setData(initialData)
-        setDataAlustettu(true)
+        
+        //data välitetään reducer-funktiolle dispatch-funktion kautta
+        dispatch({type:"INIT_DATA",data:initialData})
+        //setData(initialData)
+        //setDataAlustettu(true)
 
       } catch (exception) {
         alert("Tietokannan alustaminen epäonnistui")
@@ -166,7 +184,7 @@ function App() {
         value={item.ikä}>
       </input>
       <button onClick={() => poistaHenkilö(index)}>Poista henkilö</button>
-      {item.jälkikasvu ? <LapsiLista lapsenNimiMuuttui={lapsenNimiMuuttui} parentIndex={index} lapsiLista={item.jälkikasvu}></LapsiLista> : ""}
+      {item.jälkikasvu ? <LapsiLista lapsenNimiMuuttui={dispatch} parentIndex={index} lapsiLista={item.jälkikasvu}></LapsiLista> : ""}
     </div>)}
 
 
