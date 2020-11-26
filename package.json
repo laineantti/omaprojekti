@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/laineantti/testailua/issues"
   },
-  "homepage": "https://github.com/laineantti/testailua#readme"
+  "homepage": "https://github.com/laineantti/testailua#readme",
+  "dependencies": {
+    "nodemon": "^2.0.6"
+  }
 }
